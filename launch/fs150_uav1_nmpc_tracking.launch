@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Single FS150 + PX4 SITL + multirotor NMPC. -->
+  <arg name="ns" default="uav1"/>
+  <arg name="vrpn_rigid_body" default="$(arg ns)"/>
+  <arg name="fs150_id" default="4"/>
+  <arg name="model_name" default="fs150_$(arg fs150_id)"/>
+  <arg name="gui" default="true"/>
+  <arg name="rviz" default="true"/>
+  <arg name="paused" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="verbose" default="false"/>
+  <arg name="interactive" default="false"/>
+
+  <arg name="world" default="$(find gazebo_sim_worlds)/worlds/weston_robot_empty/weston_robot_empty.world"/>
+  <arg name="sdf" default="$(find gazebo_sim_fs150_sitl)/models/fs150/iris.sdf"/>
+  <arg name="param_file" default="$(find gazebo_sim_fs150_sitl)/config/generated/fs150-sitl.params"/>
+
+  <arg name="enable_vrpn_server" default="true"/>
+  <arg name="state_source" default="state_estimator"/>
+  <arg name="tracking_backend" default="nmpc_attitude_rate"/>
+  <arg name="enable_yaw_control" default="false"/>
+  <arg name="takeoff_altitude" default="3.0"/>
+  <arg name="debug_print" default="false"/>
+
+  <arg name="reference_start_delay" default="0.2"/>
+  <arg name="reference_duration" default="60.0"/>
+  <arg name="reference_radius" default="3.0"/>
+  <arg name="reference_line_speed" default="1.0"/>
+  <arg name="reference_height" default="3.0"/>
+  <arg name="reference_z_amplitude" default="0.0"/>
+  <arg name="reference_z_frequency" default="0.5"/>
+  <arg name="reference_entry_duration" default="5.0"/>
+  <arg name="reference_analytic_type" default="3"/>
+  <arg name="reference_torus_omega" default="0.3"/>
+  <arg name="reference_torus_scale" default="0.3"/>
+
+  <arg name="estimator_config_file"
+       default="$(find estimator_vrpn_px4_rotor_state)/config/vrpn_px4_rotor_state_estimator_gazebo.yaml"/>
+  <arg name="hover_thrust_config_file"
+       default="$(find hover_thrust_estimator)/config/hover_thrust_estimator.yaml"/>
+  <arg name="reference_config_file"
+       default="$(find multirotor_reference_trajectory)/config/multirotor_reference_trajectory.yaml"/>
+  <arg name="controller_config_file"
+       default="$(find px4_multirotor_controller)/config/uav_nmpc.yaml"/>
+  <arg name="rviz_config" default="$(find gazebo_sim_examples)/rviz/fs150_uav1_nmpc_tracking.rviz"/>
+
+  <include file="$(find gazebo_sim_fs150_sitl)/launch/fs150.launch">
+    <arg name="ID" value="$(arg fs150_id)"/>
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="model_name" value="$(arg model_name)"/>
+    <arg name="world" value="$(arg world)"/>
+    <arg name="sdf" value="$(arg sdf)"/>
+    <arg name="param_file" value="$(arg param_file)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="interactive" value="$(arg interactive)"/>
+  </include>
+
+  <include file="$(find gazebo_sim_fs150_sitl)/launch/fs150_robot_description.launch">
+    <arg name="sdf" value="$(arg sdf)"/>
+  </include>
+
+  <include if="$(arg enable_vrpn_server)" file="$(find gazebo_sim_vrpn_bridge)/launch/vrpn_server.launch">
+    <arg name="auto_track_known_models" value="true"/>
+  </include>
+
+  <include if="$(arg enable_vrpn_server)" file="$(find gazebo_sim_vrpn_bridge)/launch/vrpn_client.launch">
+    <arg name="server" value="127.0.0.1"/>
+    <arg name="trackers" value="[$(arg vrpn_rigid_body)]"/>
+    <arg name="frame_id" value="world"/>
+  </include>
+
+  <node pkg="tf" type="static_transform_publisher" name="world_to_odom"
+        args="0 0 0 0 0 0 world odom 100"/>
+
+  <include file="$(find estimator_vrpn_px4_rotor_state)/launch/vrpn_px4_rotor_state_estimator.launch">
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="config_file" value="$(arg estimator_config_file)"/>
+  </include>
+
+  <include file="$(find hover_thrust_estimator)/launch/hover_thrust_estimator.launch">
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="config_file" value="$(arg hover_thrust_config_file)"/>
+  </include>
+
+  <include file="$(find multirotor_reference_trajectory)/launch/uav_multirotor_reference_trajectory.launch">
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="config_file" value="$(arg reference_config_file)"/>
+    <arg name="reference_path_preview_duration" value="$(arg reference_duration)"/>
+  </include>
+
+  <include file="$(find px4_multirotor_controller)/launch/uav_nmpc_controller.launch">
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="vrpn_rigid_body" value="$(arg vrpn_rigid_body)"/>
+    <arg name="state_source" value="$(arg state_source)"/>
+    <arg name="tracking_backend" value="$(arg tracking_backend)"/>
+    <arg name="enable_yaw_control" value="$(arg enable_yaw_control)"/>
+    <arg name="takeoff_altitude" value="$(arg takeoff_altitude)"/>
+    <arg name="debug_print" value="$(arg debug_print)"/>
+    <arg name="config_file" value="$(arg controller_config_file)"/>
+    <arg name="reference_start_delay" value="$(arg reference_start_delay)"/>
+    <arg name="reference_duration" value="$(arg reference_duration)"/>
+    <arg name="reference_radius" value="$(arg reference_radius)"/>
+    <arg name="reference_line_speed" value="$(arg reference_line_speed)"/>
+    <arg name="reference_height" value="$(arg reference_height)"/>
+    <arg name="reference_z_amplitude" value="$(arg reference_z_amplitude)"/>
+    <arg name="reference_z_frequency" value="$(arg reference_z_frequency)"/>
+    <arg name="reference_entry_duration" value="$(arg reference_entry_duration)"/>
+    <arg name="reference_analytic_type" value="$(arg reference_analytic_type)"/>
+    <arg name="reference_torus_omega" value="$(arg reference_torus_omega)"/>
+    <arg name="reference_torus_scale" value="$(arg reference_torus_scale)"/>
+  </include>
+
+  <node if="$(arg rviz)"
+        pkg="rviz"
+        type="rviz"
+        name="fs150_nmpc_rviz"
+        args="-d $(arg rviz_config)"
+        output="screen"/>
+</launch>

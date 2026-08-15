@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Single Scout Mini + unicycle NMPC circle tracking. -->
+  <arg name="ns" default="ugv1"/>
+  <arg name="model_name" default="$(arg ns)"/>
+  <arg name="world_name" default="$(find gazebo_sim_worlds)/worlds/empty/empty.world"/>
+  <arg name="gui" default="true"/>
+  <arg name="rviz" default="true"/>
+  <arg name="paused" default="false"/>
+
+  <arg name="ugv_x" default="3.0"/>
+  <arg name="ugv_y" default="0.0"/>
+  <arg name="ugv_z" default="0.181"/>
+  <arg name="ugv_yaw" default="1.57079632679"/>
+
+  <arg name="enable_vrpn_server" default="true"/>
+  <arg name="state_source" default="state_estimator"/>
+  <arg name="auto_start_tracking" default="true"/>
+
+  <arg name="reference_default_enabled" default="true"/>
+  <arg name="reference_default_type" default="1"/>
+  <arg name="reference_default_duration" default="120.0"/>
+  <arg name="reference_default_radius" default="3.0"/>
+  <arg name="reference_default_line_speed" default="1.0"/>
+  <arg name="reference_default_origin_x" default="$(arg ugv_x)"/>
+  <arg name="reference_default_origin_y" default="$(arg ugv_y)"/>
+  <arg name="reference_default_origin_yaw" default="$(arg ugv_yaw)"/>
+  <arg name="reference_default_center_x" default="0.0"/>
+  <arg name="reference_default_center_y" default="0.0"/>
+
+  <arg name="target_replanner_enabled" default="false"/>
+  <arg name="target_replanner_random_targets" default="true"/>
+  <arg name="target_replanner_period" default="5.0"/>
+  <arg name="target_replanner_random_min_x" default="-5.0"/>
+  <arg name="target_replanner_random_max_x" default="5.0"/>
+  <arg name="target_replanner_random_min_y" default="-5.0"/>
+  <arg name="target_replanner_random_max_y" default="5.0"/>
+  <arg name="target_replanner_random_seed" default="0"/>
+
+  <arg name="min_linear_speed" default="-1.5"/>
+  <arg name="max_linear_speed" default="1.5"/>
+  <arg name="max_angular_speed" default="0.5235"/>
+  <arg name="max_linear_acceleration" default="2.0"/>
+
+  <arg name="imu_topic" default="/$(arg ns)/imu/data_raw"/>
+  <arg name="rviz_config" default="$(find gazebo_sim_examples)/rviz/scout_ugv1_nmpc_tracking.rviz"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <include file="$(find gazebo_sim_scout)/launch/spawn_accurate.launch">
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="model_name" value="$(arg model_name)"/>
+    <arg name="x" value="$(arg ugv_x)"/>
+    <arg name="y" value="$(arg ugv_y)"/>
+    <arg name="z" value="$(arg ugv_z)"/>
+    <arg name="yaw" value="$(arg ugv_yaw)"/>
+    <arg name="max_linear_speed" value="$(arg max_linear_speed)"/>
+    <arg name="max_angular_speed" value="$(arg max_angular_speed)"/>
+  </include>
+
+  <include if="$(arg enable_vrpn_server)" file="$(find gazebo_sim_vrpn_bridge)/launch/vrpn_server.launch">
+    <arg name="auto_track_known_models" value="true"/>
+  </include>
+
+  <include if="$(arg enable_vrpn_server)" file="$(find gazebo_sim_vrpn_bridge)/launch/vrpn_client.launch">
+    <arg name="server" value="127.0.0.1"/>
+    <arg name="trackers" value="[$(arg model_name)]"/>
+    <arg name="frame_id" value="world"/>
+  </include>
+
+  <node pkg="tf" type="static_transform_publisher" name="world_to_odom"
+        args="0 0 0 0 0 0 world odom 100"/>
+
+  <include file="$(find estimator_vrpn_ugv_state)/launch/vrpn_ugv_state_estimator.launch">
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="pose_source" value="vrpn"/>
+    <arg name="imu_topic" value="$(arg imu_topic)"/>
+  </include>
+
+  <include file="$(find unicycle_reference_trajectory)/launch/ugv_unicycle_reference_trajectory.launch">
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="max_velocity" value="$(arg max_linear_speed)"/>
+    <arg name="max_acceleration" value="$(arg max_linear_acceleration)"/>
+    <arg name="max_yaw_rate" value="$(arg max_angular_speed)"/>
+    <arg name="default_analytic_enabled" value="$(arg reference_default_enabled)"/>
+    <arg name="default_analytic_type" value="$(arg reference_default_type)"/>
+    <arg name="default_analytic_duration" value="$(arg reference_default_duration)"/>
+    <arg name="default_analytic_radius" value="$(arg reference_default_radius)"/>
+    <arg name="default_analytic_line_speed" value="$(arg reference_default_line_speed)"/>
+    <arg name="default_analytic_origin_x" value="$(arg reference_default_origin_x)"/>
+    <arg name="default_analytic_origin_y" value="$(arg reference_default_origin_y)"/>
+    <arg name="default_analytic_origin_yaw" value="$(arg reference_default_origin_yaw)"/>
+    <arg name="default_analytic_center_x" value="$(arg reference_default_center_x)"/>
+    <arg name="default_analytic_center_y" value="$(arg reference_default_center_y)"/>
+  </include>
+
+  <include if="$(arg target_replanner_enabled)"
+           file="$(find unicycle_reference_trajectory)/launch/ugv_unicycle_target_replanner.launch">
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="replan_period" value="$(arg target_replanner_period)"/>
+    <arg name="desired_speed" value="$(arg reference_default_line_speed)"/>
+    <arg name="max_velocity" value="$(arg max_linear_speed)"/>
+    <arg name="max_acceleration" value="$(arg max_linear_acceleration)"/>
+    <arg name="max_yaw_rate" value="$(arg max_angular_speed)"/>
+    <arg name="random_targets" value="$(arg target_replanner_random_targets)"/>
+    <arg name="random_min_x" value="$(arg target_replanner_random_min_x)"/>
+    <arg name="random_max_x" value="$(arg target_replanner_random_max_x)"/>
+    <arg name="random_min_y" value="$(arg target_replanner_random_min_y)"/>
+    <arg name="random_max_y" value="$(arg target_replanner_random_max_y)"/>
+    <arg name="random_seed" value="$(arg target_replanner_random_seed)"/>
+  </include>
+
+  <include file="$(find unicycle_ugv_controller)/launch/ugv_unicycle_nmpc_controller.launch">
+    <arg name="ns" value="$(arg ns)"/>
+    <arg name="state_source" value="$(arg state_source)"/>
+    <arg name="cmd_vel_topic" value="cmd_vel"/>
+    <arg name="auto_start_tracking" value="$(arg auto_start_tracking)"/>
+    <arg name="min_linear_speed" value="$(arg min_linear_speed)"/>
+    <arg name="max_linear_speed" value="$(arg max_linear_speed)"/>
+    <arg name="max_angular_speed" value="$(arg max_angular_speed)"/>
+    <arg name="max_linear_acceleration" value="$(arg max_linear_acceleration)"/>
+  </include>
+
+  <node if="$(arg rviz)"
+        pkg="rviz"
+        type="rviz"
+        name="scout_nmpc_rviz"
+        args="-d $(arg rviz_config)"
+        output="screen"/>
+</launch>
