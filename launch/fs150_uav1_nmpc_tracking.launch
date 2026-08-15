@@ -34,7 +34,7 @@
   <arg name="reference_entry_duration" default="5.0"/>
   <arg name="reference_analytic_type" default="9"/>
   <arg name="reference_torus_omega" default="0.3"/>
-  <arg name="reference_torus_scale" default="0.3"/>
+  <arg name="reference_torus_scale" default="2.0"/>
 
   <arg name="estimator_config_file"
        default="$(find estimator_vrpn_px4_rotor_state)/config/vrpn_px4_rotor_state_estimator_gazebo.yaml"/>
@@ -80,10 +80,12 @@
   <node pkg="tf" type="static_transform_publisher" name="world_to_odom"
         args="0 0 0 0 0 0 world odom 100"/>
 
-  <!-- MAVROS pose is in map, URDF root is base_link. Without this TF, RViz RobotModel is empty. -->
+  <!-- Attach RobotModel to the same world-frame estimate NMPC uses.
+       MAVROS local_position/pose is PX4 EKF in map and does not line up
+       with /alg/nmpc/predicted_path. -->
   <node pkg="gazebo_sim_examples" type="pose_to_tf" name="uav1_pose_to_tf" output="screen">
-    <param name="pose_topic" value="/$(arg ns)/mavros/local_position/pose"/>
-    <param name="parent_frame_id" value="map"/>
+    <param name="state_topic" value="/$(arg ns)/alg/state_estimator/state"/>
+    <param name="parent_frame_id" value="world"/>
     <param name="child_frame_id" value="base_link"/>
   </node>
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="fs150_robot_state_publisher" output="screen"/>
