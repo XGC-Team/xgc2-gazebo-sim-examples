@@ -82,6 +82,7 @@
     <arg name="ns" value="$(arg ns)"/>
     <arg name="pose_source" value="vrpn"/>
     <arg name="imu_topic" value="$(arg imu_topic)"/>
+    <arg name="pose_topic" value="/vrpn_client_node/$(arg model_name)/pose"/>
   </include>
 
   <include file="$(find unicycle_reference_trajectory)/launch/ugv_unicycle_reference_trajectory.launch">
