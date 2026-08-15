@@ -12,7 +12,7 @@
   <arg name="verbose" default="false"/>
   <arg name="interactive" default="false"/>
 
-  <arg name="world" default="$(find gazebo_sim_worlds)/worlds/weston_robot_empty/weston_robot_empty.world"/>
+  <arg name="world" default="$(find gazebo_sim_worlds)/worlds/empty/empty.world"/>
   <arg name="sdf" default="$(find gazebo_sim_fs150_sitl)/models/fs150/iris.sdf"/>
   <arg name="param_file" default="$(find gazebo_sim_fs150_sitl)/config/generated/fs150-sitl.params"/>
 
@@ -21,10 +21,11 @@
   <arg name="tracking_backend" default="nmpc_attitude_rate"/>
   <arg name="enable_yaw_control" default="false"/>
   <arg name="takeoff_altitude" default="3.0"/>
+  <arg name="auto_takeoff_track" default="true"/>
   <arg name="debug_print" default="false"/>
 
   <arg name="reference_start_delay" default="0.2"/>
-  <arg name="reference_duration" default="60.0"/>
+  <arg name="reference_duration" default="600.0"/>
   <arg name="reference_radius" default="3.0"/>
   <arg name="reference_line_speed" default="1.0"/>
   <arg name="reference_height" default="3.0"/>
@@ -64,7 +65,8 @@
   </include>
 
   <include if="$(arg enable_vrpn_server)" file="$(find gazebo_sim_vrpn_bridge)/launch/vrpn_server.launch">
-    <arg name="auto_track_known_models" value="true"/>
+    <arg name="config_file" value="$(find gazebo_sim_examples)/config/fs150_uav1_vrpn_server.yaml"/>
+    <arg name="auto_track_known_models" value="false"/>
   </include>
 
   <include if="$(arg enable_vrpn_server)" file="$(find gazebo_sim_vrpn_bridge)/launch/vrpn_client.launch">
@@ -73,8 +75,18 @@
     <arg name="frame_id" value="world"/>
   </include>
 
+  <node pkg="tf" type="static_transform_publisher" name="world_to_map"
+        args="0 0 0 0 0 0 world map 100"/>
   <node pkg="tf" type="static_transform_publisher" name="world_to_odom"
         args="0 0 0 0 0 0 world odom 100"/>
+
+  <!-- MAVROS pose is in map, URDF root is base_link. Without this TF, RViz RobotModel is empty. -->
+  <node pkg="gazebo_sim_examples" type="pose_to_tf" name="uav1_pose_to_tf" output="screen">
+    <param name="pose_topic" value="/$(arg ns)/mavros/local_position/pose"/>
+    <param name="parent_frame_id" value="map"/>
+    <param name="child_frame_id" value="base_link"/>
+  </node>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="fs150_robot_state_publisher" output="screen"/>
 
   <include file="$(find estimator_vrpn_px4_rotor_state)/launch/vrpn_px4_rotor_state_estimator.launch">
     <arg name="ns" value="$(arg ns)"/>
@@ -120,4 +132,11 @@
         name="fs150_nmpc_rviz"
         args="-d $(arg rviz_config)"
         output="screen"/>
+
+  <node if="$(arg auto_takeoff_track)"
+        pkg="gazebo_sim_examples"
+        type="uav_auto_takeoff_track.py"
+        name="uav_auto_takeoff_track"
+        output="screen"
+        args="--ns $(arg ns) --height $(arg takeoff_altitude)"/>
 </launch>
