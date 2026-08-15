@@ -77,25 +77,38 @@ Visualization Manager:
       Class: rviz/Path
       Color: 255; 150; 20
       Enabled: true
+      Head Diameter: 0.22
+      Head Length: 0.12
+      Length: 0.22
       Line Style: Lines
       Line Width: 0.03
       Name: NMPC Predicted Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 210; 70
+      Pose Style: Axes
+      Queue Size: 10
+      Radius: 0.03
+      Shaft Diameter: 0.08
+      Shaft Length: 0.08
       Topic: /ugv1/alg/nmpc/predicted_path
       Unreliable: false
       Value: true
-    - Alpha: 0.85
-      Arrow Length: 0.18
-      Axes Length: 0.18
-      Axes Radius: 0.012
+    - Alpha: 0.9
+      Arrow Length: 0.22
+      Axes Length: 0.28
+      Axes Radius: 0.018
       Class: rviz/PoseArray
       Color: 255; 210; 70
       Enabled: true
-      Head Length: 0.06
-      Head Radius: 0.03
+      Head Length: 0.08
+      Head Radius: 0.04
       Name: NMPC Predicted Axes
       Queue Size: 10
-      Shaft Length: 0.14
-      Shaft Radius: 0.01
+      Shaft Length: 0.18
+      Shaft Radius: 0.012
       Shape: Axes
       Topic: /ugv1/alg/nmpc/predicted_poses
       Unreliable: false
