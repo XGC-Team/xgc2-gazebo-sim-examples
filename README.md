@@ -21,7 +21,7 @@ roslaunch gazebo_sim_examples scout_ugv1_nmpc_tracking.launch
 Gazebo GUI and RViz start by default. RViz uses `RobotModel` plus the TF
 tree (`odom` → `base_link` → wheel links). It does not hard-draw wheels.
 
-Single FS150, PX4 SITL, multirotor NMPC:
+Single FS150, PX4 SITL, multirotor NMPC torus-knot tracking:
 
 ```bash
 roslaunch gazebo_sim_examples fs150_uav1_nmpc_tracking.launch
