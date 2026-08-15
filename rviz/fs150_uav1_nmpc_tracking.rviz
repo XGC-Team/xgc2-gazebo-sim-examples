@@ -83,6 +83,23 @@ Visualization Manager:
       Topic: /uav1/alg/nmpc/predicted_path
       Unreliable: false
       Value: true
+    - Alpha: 0.85
+      Arrow Length: 0.18
+      Axes Length: 0.18
+      Axes Radius: 0.012
+      Class: rviz/PoseArray
+      Color: 255; 210; 70
+      Enabled: true
+      Head Length: 0.06
+      Head Radius: 0.03
+      Name: NMPC Predicted Axes
+      Queue Size: 10
+      Shaft Length: 0.14
+      Shaft Radius: 0.01
+      Shape: Axes
+      Topic: /uav1/alg/nmpc/predicted_poses
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
