@@ -17,7 +17,6 @@
   <arg name="param_file" default="$(find gazebo_sim_fs150_sitl)/config/generated/fs150-sitl.params"/>
 
   <arg name="enable_vrpn_server" default="true"/>
-  <arg name="state_source" default="state_estimator"/>
   <arg name="tracking_backend" default="nmpc_attitude_rate"/>
   <arg name="enable_yaw_control" default="false"/>
   <arg name="takeoff_altitude" default="3.0"/>
@@ -109,7 +108,6 @@
   <include file="$(find px4_multirotor_controller)/launch/uav_nmpc_controller.launch">
     <arg name="ns" value="$(arg ns)"/>
     <arg name="vrpn_rigid_body" value="$(arg vrpn_rigid_body)"/>
-    <arg name="state_source" value="$(arg state_source)"/>
     <arg name="tracking_backend" value="$(arg tracking_backend)"/>
     <arg name="enable_yaw_control" value="$(arg enable_yaw_control)"/>
     <arg name="takeoff_altitude" value="$(arg takeoff_altitude)"/>
