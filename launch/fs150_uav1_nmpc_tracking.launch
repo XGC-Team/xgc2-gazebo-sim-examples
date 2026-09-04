@@ -17,7 +17,7 @@
   <arg name="param_file" default="$(find gazebo_sim_fs150_sitl)/config/generated/fs150-sitl.params"/>
 
   <arg name="enable_vrpn_server" default="true"/>
-  <arg name="tracking_backend" default="nmpc_attitude_rate"/>
+  <arg name="tracking_backend" default="nmpc"/>
   <arg name="enable_yaw_control" default="false"/>
   <arg name="takeoff_altitude" default="3.0"/>
   <arg name="auto_takeoff_track" default="true"/>
