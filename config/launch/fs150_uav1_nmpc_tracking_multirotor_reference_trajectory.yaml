@@ -1,0 +1,24 @@
+# Complete configuration for this launch composition.
+active_analytic_topic: alg/multirotor_reference_trajectory/active/analytic
+active_polynomial_topic: alg/multirotor_reference_trajectory/active/polynomial
+active_publish_rate: 10.0
+active_sampled_topic: alg/multirotor_reference_trajectory/active/sampled
+analytic_topic: alg/multirotor_reference_trajectory/request/analytic
+main_frequency: 100.0
+max_acceleration: 0.0
+max_jerk: 0.0
+max_snap: 0.0
+max_velocity: 0.0
+min_lead_time: 0.2
+min_specific_thrust: 0.1
+queue_size: 10
+reference_path_preview_duration: 600.0
+reference_path_sample_dt: 0.02
+reference_path_topic: alg/multirotor_reference_trajectory/visualization/reference_path
+reset_topic: alg/multirotor_reference_trajectory/reset
+sampled_topic: alg/multirotor_reference_trajectory/request/sampled
+status_rate: 10.0
+status_topic: alg/multirotor_reference_trajectory/status
+trajectory_timeout: 0.5
+validation_sample_dt: 0.02
+waypoint_topic: alg/multirotor_reference_trajectory/request/waypoint

@@ -1,0 +1,3 @@
+child_frame_id: base_link
+parent_frame_id: world
+state_topic: /$(arg ns)/alg/state_estimator/state
