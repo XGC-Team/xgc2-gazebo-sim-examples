@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <launch>
     <arg name="controller_config_file" default="$(find gazebo_sim_examples)/config/launch/scout_ugv1_nmpc_tracking_unicycle_ugv_controller.yaml" />
-    <arg name="target_replanner_config_file" default="$(find gazebo_sim_examples)/config/launch/scout_ugv1_nmpc_tracking_target_replanner.yaml" />
     <arg name="reference_config_file" default="$(find gazebo_sim_examples)/config/launch/scout_ugv1_nmpc_tracking_unicycle_reference_trajectory.yaml" />
     <arg name="ns" default="ugv1" />
     <arg name="model_name" default="$(arg ns)" />
@@ -14,7 +13,6 @@
     <arg name="ugv_z" default="0.181" />
     <arg name="ugv_yaw" default="1.57079632679" />
     <arg name="enable_vrpn_server" default="true" />
-    <arg name="target_replanner_enabled" default="false" />
     <arg name="max_linear_speed" default="1.5" />
     <arg name="max_angular_speed" default="0.5235" />
     <arg name="imu_topic" default="/$(arg ns)/imu/data_raw" />
@@ -55,10 +53,6 @@
     <include file="$(find unicycle_reference_trajectory)/launch/ugv_unicycle_reference_trajectory.launch">
         <arg name="ns" value="$(arg ns)" />
         <arg name="config_file" value="$(arg reference_config_file)" />
-    </include>
-    <include if="$(arg target_replanner_enabled)" file="$(find unicycle_reference_trajectory)/launch/ugv_unicycle_target_replanner.launch">
-        <arg name="ns" value="$(arg ns)" />
-        <arg name="config_file" value="$(arg target_replanner_config_file)" />
     </include>
     <include file="$(find unicycle_ugv_controller)/launch/ugv_unicycle_nmpc_controller.launch">
         <arg name="ns" value="$(arg ns)" />
